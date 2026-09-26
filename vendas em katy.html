@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katy Fashion - Gestão de Diretos, Faturação & Contabilidade</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --gold-light: #f6e05e;
+            --gold-main: #d69e2e;
+            --gold-dark: #b7791f;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --bg-dark: #1a202c;
+            --card-bg: #2d3748;
+            --text-gold: #f6e05e;
+            --text-light: #f7fafc;
+            --border-gold: #d69e2e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header-bar {
+            background: var(--gold-gradient);
+            color: #1a202c;
+            padding: 20px 30px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .header-bar h1 { margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .clock-box { text-align: right; font-weight: bold; }
+        .clock-time { font-size: 22px; margin-top: 4px; }
+
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--gold-main);
+            background: #2d3748;
+            color: var(--gold-light);
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--gold-gradient);
+            color: #1a202c;
+            box-shadow: 0 0 10px rgba(214, 158, 46, 0.6);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .card h2, .card h3 { margin-top: 0; color: var(--gold-light); border-bottom: 1px solid var(--gold-main); padding-bottom: 8px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--gold-light); }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gold-main);
+            border-radius: 6px;
+            background: #1a202c;
+            color: white;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: var(--gold-gradient);
+            color: #1a202c;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        .btn:hover { opacity: 0.9; box-shadow: 0 0 12px rgba(246, 224, 94, 0.8); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #1a202c; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #4a5568; }
+        th { background: var(--gold-dark); color: white; font-weight: 700; }
+
+        .kpi-container { display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        .kpi-card { flex: 1; min-width: 140px; background: #1a202c; border: 1px solid var(--gold-main); padding: 16px; border-radius: 8px; text-align: center; }
+        .kpi-card .val { font-size: 24px; font-weight: bold; color: var(--gold-light); margin-top: 5px; }
+
+        .chart-wrapper { position: relative; height: 300px; width: 100%; margin-top: 15px; }
+
+        /* MOSTRA DA FATURA OFICIAL */
+        .fatura-box {
+            background: white;
+            color: black;
+            padding: 30px;
+            border-radius: 8px;
+            border: 2px solid var(--gold-main);
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .fatura-header { display: flex; justify-content: space-between; border-bottom: 2px solid #ddd; padding-bottom: 15px; }
+        .fatura-title { font-size: 22px; font-weight: bold; color: #1a365d; }
+        .fatura-details { margin-top: 15px; display: flex; justify-content: space-between; }
+        .fatura-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .fatura-table th { background: #f0f0f0; color: #333; border: 1px solid #ccc; padding: 8px; }
+        .fatura-table td { border: 1px solid #ccc; padding: 8px; color: #333; }
+
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .header-bar, .nav-tabs, .no-print, .card-form { display: none !important; }
+            .fatura-box { border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO DOURADO -->
+    <div class="header-bar">
+        <div>
+            <h1>KATY FASHION</h1>
+            <small>Sistema Integrado de Vendas em Direto, Faturação & Contabilidade</small>
+        </div>
+        <div class="clock-box">
+            <div id="dataCompleta">Carregando data...</div>
+            <div class="clock-time" id="relogioHora">00:00:00</div>
+        </div>
+    </div>
+
+    <!-- NAVEGAÇÃO -->
+    <div class="nav-tabs no-print">
+        <button class="tab-btn active" onclick="mudarAba('live')">📹 1. Registar Venda em Direto</button>
+        <button class="tab-btn" onclick="mudarAba('faturacao')">🧾 2. Emissão de Faturas & Excel</button>
+        <button class="tab-btn" onclick="mudarAba('contabilidade')">📊 3. Contabilidade & Balanço</button>
+        <button class="tab-btn" onclick="mudarAba('estatisticas')">📈 4. Gráficos & Estatísticas</button>
+    </div>
+
+    <!-- ABA 1: REGISTO DA LIVE -->
+    <div id="live" class="tab-content active">
+        <div class="grid-2">
+            <div class="card card-form">
+                <h3>Registar Peça Vendida</h3>
+                
+                <!-- DADOS DA EMPRESA E VENDEDORA -->
+                <div class="form-group">
+                    <label>Empresa / Marca:</label>
+                    <input type="text" id="empresaNome" value="Katy Fashion">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Gerente / Responsável:</label>
+                        <input type="text" id="patraoNome" value="Katy Fashion - Gerência">
+                    </div>
+                    <div class="form-group">
+                        <label>Nome da Vendedora:</label>
+                        <input type="text" id="vendedoraNome" placeholder="Ex: Maria Santos">
+                    </div>
+                </div>
+
+                <!-- DADOS DO CLIENTE -->
+                <div class="form-group">
+                    <label>Nome do Cliente:</label>
+                    <input type="text" id="clienteNome" value="Consumidor Final">
+                </div>
+
+                <!-- DETALHES DA PEÇA -->
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Categoria:</label>
+                        <select id="catSelect">
+                            <option value="Parkas">Parkas</option>
+                            <option value="Casacos de Pelo">Casacos de Pelo</option>
+                            <option value="Vestidos">Vestidos</option>
+                            <option value="Calçado">Calçado</option>
+                            <option value="Acessórios">Acessórios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome / Refª da Peça:</label>
+                        <input type="text" id="nomePeca" placeholder="Ex: Parka Bege Impermeável">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Preço Custo (€):</label>
+                        <input type="number" step="0.01" id="custoPeca" placeholder="12.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Preço Venda Direto (€):</label>
+                        <input type="number" step="0.01" id="precoPeca" placeholder="29.90">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantidade Vendida:</label>
+                    <input type="number" id="qtdPeca" value="1" min="1">
+                </div>
+
+                <button class="btn" onclick="registarVenda()">Registar Venda & Gerar Fatura</button>
+            </div>
+
+            <div class="card">
+                <h3>Resumo em Tempo Real</h3>
+                <div class="kpi-container">
+                    <div class="kpi-card"><div>Peças Vendidas</div><div class="val" id="totalPecasDireto">0</div></div>
+                    <div class="kpi-card"><div>Faturação</div><div class="val" id="totalFaturadoDireto">0.00 €</div></div>
+                    <div class="kpi-card"><div>Lucro Bruto</div><div class="val" style="color: #68d391;" id="totalLucroDireto">0.00 €</div></div>
+                </div>
+
+                <h4 style="margin-top: 20px; color: var(--gold-light);">Últimas Peças Registadas:</h4>
+                <table>
+                    <thead>
+                        <tr><th>Hora</th><th>Peça</th><th>Venda</th><th>Custo</th><th>Lucro</th></tr>
+                    </thead>
+                    <tbody id="tabelaLiveBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 2: FATURAÇÃO COMPLETA -->
+    <div id="faturacao" class="tab-content">
+        <div class="card">
+            <h2 class="no-print">Gestão e Emissão de Faturas</h2>
+            
+            <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 15px;">
+                <button class="btn" style="width: auto; background: #38a169; color: white;" onclick="exportarExcel()">📥 Exportar Vendas para Excel (.CSV)</button>
+                <button class="btn" style="width: auto;" onclick="window.print()">🖨️ Imprimir Fatura Selecionada / Todas</button>
+            </div>
+
+            <!-- MODELO DE FATURA IMPRESSA -->
+            <div id="faturaImpressao" class="fatura-box">
+                <div class="fatura-header">
+                    <div>
+                        <div class="fatura-title" id="ftEmpresa">KATY FASHION</div>
+                        <div>Portugal</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <h3 style="margin: 0; color: #1a365d;" id="ftNumero">FATURA Nº FT 2026/1001</h3>
+                        <div id="ftDataHora">Data: 26/09/2026 00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="fatura-details">
+                    <div>
+                        <strong>DADOS DO CLIENTE:</strong><br>
+                        Nome: <span id="ftClienteNome">Consumidor Final</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong>DADOS DA OPERAÇÃO:</strong><br>
+                        Gerência: <span id="ftPatrao">Katy Fashion - Gerência</span><br>
+                        Vendedora: <span id="ftVendedora">Geral</span>
+                    </div>
+                </div>
+
+                <table class="fatura-table">
+                    <thead>
+                        <tr>
+                            <th>Descrição / Artigo</th>
+                            <th>Categoria</th>
+                            <th>Qtd</th>
+                            <th>Preço Unitário</th>
+                            <th>Total (€)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ftLinhasTabela">
+                        <tr><td colspan="5" style="text-align: center;">Nenhuma venda registada para esta fatura.</td></tr>
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; margin-top: 20px; font-size: 18px; font-weight: bold;">
+                    Total a Pagar: <span id="ftTotalFinal">0.00 €</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 3: CONTABILIDADE -->
+    <div id="contabilidade" class="tab-content">
+        <div class="card">
+            <h2>Balanço de Gestão Financeira</h2>
+            <div class="form-group">
+                <label>Despesas Operacionais da Live (€) (Portes, Embalagens, Anúncios):</label>
+                <input type="number" step="0.01" id="despesasLive" value="0.00" style="max-width: 300px;" oninput="atualizarTabelas()">
+            </div>
+            <div class="kpi-container">
+                <div class="kpi-card"><div>Faturação Total</div><div class="val" id="contValorTotal">0.00 €</div></div>
+                <div class="kpi-card"><div>Custo Total Peças</div><div class="val" style="color: #fc8181;" id="contCustoTotal">0.00 €</div></div>
+                <div class="kpi-card"><div>Lucro Líquido Final</div><div class="val" style="color: #68d391;" id="contLucroLiquido">0.00 €</div></div>
+                <div class="kpi-card"><div>Margem Média (%)</div><div class="val" id="contMargemPct">0.0%</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 4: ESTATÍSTICAS -->
+    <div id="estatisticas" class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <h3>Vendas por Categoria (Quantidade)</h3>
+                <div class="chart-wrapper"><canvas id="chartCategorias"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Faturação vs. Custo vs. Lucro (€)</h3>
+                <div class="chart-wrapper"><canvas id="chartFinanceiro"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let vendas = [];
+        let numFatura = 1001;
+        let chartCatInstance = null;
+        let chartFinInstance = null;
+
+        function atualizarRelogio() {
+            const agora = new Date();
+            const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+            document.getElementById('dataCompleta').innerText = `${diasSemana[agora.getDay()]}, ${String(agora.getDate()).padStart(2, '0')} de ${meses[agora.getMonth()]} de ${agora.getFullYear()}`;
+            document.getElementById('relogioHora').innerText = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}:${String(agora.getSeconds()).padStart(2, '0')}`;
+        }
+
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+
+        function registarVenda() {
+            const empresa = document.getElementById('empresaNome').value || "Katy Fashion";
+            const patrao = document.getElementById('patraoNome').value || "Katy Fashion - Gerência";
+            const vendedora = document.getElementById('vendedoraNome').value || "Geral";
+            const clienteNome = document.getElementById('clienteNome').value || "Consumidor Final";
+            
+            const cat = document.getElementById('catSelect').value;
+            const peca = document.getElementById('nomePeca').value || cat;
+            const custo = parseFloat(document.getElementById('custoPeca').value) || 0;
+            const preco = parseFloat(document.getElementById('precoPeca').value) || 0;
+            const qtd = parseInt(document.getElementById('qtdPeca').value) || 1;
+            const hora = new Date().toLocaleTimeString('pt-PT');
+            const dataCompleta = new Date().toLocaleDateString('pt-PT') + " " + hora;
+
+            if(preco <= 0) {
+                alert("Insira um preço de venda válido!");
+                return;
+            }
+
+            const totalVenda = preco * qtd;
+            const totalCusto = custo * qtd;
+            const lucroBruto = totalVenda - totalCusto;
+
+            const novaVenda = {
+                fatura: "FT 2026/" + numFatura++,
+                dataHora: dataCompleta,
+                empresa: empresa,
+                patrao: patrao,
+                vendedora: vendedora,
+                clienteNome: clienteNome,
+                categoria: cat,
+                peca: peca,
+                custo: custo,
+                preco: preco,
+                qtd: qtd,
+                totalVenda: totalVenda,
+                totalCusto: totalCusto,
+                lucroBruto: lucroBruto
+            };
+
+            vendas.push(novaVenda);
+
+            document.getElementById('nomePeca').value = '';
+            document.getElementById('custoPeca').value = '';
+            document.getElementById('precoPeca').value = '';
+            document.getElementById('qtdPeca').value = '1';
+
+            atualizarTabelas();
+            desenharFatura(novaVenda);
+        }
+
+        function desenharFatura(v) {
+            document.getElementById('ftEmpresa').innerText = v.empresa;
+            document.getElementById('ftNumero').innerText = "FATURA Nº " + v.fatura;
+            document.getElementById('ftDataHora').innerText = "Data: " + v.dataHora;
+            document.getElementById('ftClienteNome').innerText = v.clienteNome;
+            document.getElementById('ftPatrao').innerText = v.patrao;
+            document.getElementById('ftVendedora').innerText = v.vendedora;
+
+            document.getElementById('ftLinhasTabela').innerHTML = `
+                <tr>
+                    <td>${v.peca}</td>
+                    <td>${v.categoria}</td>
+                    <td>${v.qtd}</td>
+                    <td>${v.preco.toFixed(2)} €</td>
+                    <td><strong>${v.totalVenda.toFixed(2)} €</strong></td>
+                </tr>
+            `;
+
+            document.getElementById('ftTotalFinal').innerText = v.totalVenda.toFixed(2) + " €";
+        }
+
+        function atualizarTabelas() {
+            const tbodyLive = document.getElementById('tabelaLiveBody');
+            tbodyLive.innerHTML = '';
+
+            let totalQtd = 0, totalFaturado = 0, totalCusto = 0, totalLucro = 0;
+
+            vendas.slice().reverse().forEach(v => {
+                totalQtd += v.qtd;
+                totalFaturado += v.totalVenda;
+                totalCusto += v.totalCusto;
+                totalLucro += v.lucroBruto;
+
+                tbodyLive.innerHTML += `<tr><td>${v.dataHora.split(' ')[1]}</td><td>${v.peca}</td><td>${v.totalVenda.toFixed(2)} €</td><td>${v.totalCusto.toFixed(2)} €</td><td style="color: #68d391; font-weight: bold;">${v.lucroBruto.toFixed(2)} €</td></tr>`;
+            });
+
+            document.getElementById('totalPecasDireto').innerText = totalQtd;
+            document.getElementById('totalFaturadoDireto').innerText = totalFaturado.toFixed(2) + ' €';
+            document.getElementById('totalLucroDireto').innerText = totalLucro.toFixed(2) + ' €';
+
+            const despesas = parseFloat(document.getElementById('despesasLive').value) || 0;
+            const lucroLiquido = totalLucro - despesas;
+            const margemPct = totalFaturado > 0 ? ((lucroLiquido / totalFaturado) * 100).toFixed(1) : 0;
+
+            document.getElementById('contValorTotal').innerText = totalFaturado.toFixed(2) + ' €';
+            document.getElementById('contCustoTotal').innerText = totalCusto.toFixed(2) + ' €';
+            document.getElementById('contLucroLiquido').innerText = lucroLiquido.toFixed(2) + ' €';
+            document.getElementById('contMargemPct').innerText = margemPct + '%';
+
+            atualizarGraficos(totalFaturado, totalCusto, totalLucro);
+        }
+
+        function atualizarGraficos(fat, custo, lucro) {
+            const catMap = {};
+            vendas.forEach(v => { catMap[v.categoria] = (catMap[v.categoria] || 0) + v.qtd; });
+
+            const labelsCat = Object.keys(catMap);
+            const dataCat = Object.values(catMap);
+
+            if(chartCatInstance) chartCatInstance.destroy();
+            const ctxCat = document.getElementById('chartCategorias').getContext('2d');
+            chartCatInstance = new Chart(ctxCat, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsCat.length ? labelsCat : ['Sem dados'],
+                    datasets: [{ data: dataCat.length ? dataCat : [1], backgroundColor: ['#d69e2e', '#f6e05e', '#319795', '#3182ce', '#e53e3e'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            if(chartFinInstance) chartFinInstance.destroy();
+            const ctxFin = document.getElementById('chartFinanceiro').getContext('2d');
+            chartFinInstance = new Chart(ctxFin, {
+                type: 'bar',
+                data: {
+                    labels: ['Faturação', 'Custo Total', 'Lucro Bruto'],
+                    datasets: [{ label: 'Euros (€)', data: [fat, custo, lucro], backgroundColor: ['#d69e2e', '#e53e3e', '#38a169'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function exportarExcel() {
+            if(vendas.length === 0) return alert("Não existem vendas registadas!");
+            let csv = "Fatura;DataHora;Empresa;Patrao;Vendedora;Cliente;Categoria;Peca;Custo;Venda;Qtd;Total_Venda;Lucro_Bruto\n";
+            vendas.forEach(v => { csv += `${v.fatura};${v.dataHora};${v.empresa};${v.patrao};${v.vendedora};${v.clienteNome};${v.categoria};${v.peca};${v.custo};${v.preco};${v.qtd};${v.totalVenda};${v.lucroBruto}\n`; });
+            const link = document.createElement("a");
+            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+            link.download = `Katy_Fashion_Relatorio_Faturas_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function mudarAba(abaId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(abaId).classList.add('active');
+            event.target.classList.add('active');
+            if(abaId === 'estatisticas') atualizarTabelas();
+        }
+    </script>
+</body>
+</html>
